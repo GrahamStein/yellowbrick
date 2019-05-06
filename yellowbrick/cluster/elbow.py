@@ -106,6 +106,15 @@ def distortion_score(X, labels, metric='euclidean'):
 
     return distortion
 
+##########################################################################
+## Metrics
+##########################################################################
+
+def inertia_score(model): 
+    """
+    Return Inertia_ score from passed sklearn KMeans model. Numerically similar to distortion.
+    """
+    return model.inertia_
 
 ##########################################################################
 ## Elbow Method
@@ -115,6 +124,7 @@ KELBOW_SCOREMAP = {
     "distortion": distortion_score,
     "silhouette": silhouette_score,
     "calinski_harabaz": calinski_harabaz_score,
+    "inertia": inertia_score, 
 }
 
 
@@ -234,12 +244,24 @@ class KElbowVisualizer(ClusteringScoreVisualizer):
     def __init__(self, model, ax=None, k=10,
                  metric="distortion", timings=True, locate_elbow=True, **kwargs):
         super(KElbowVisualizer, self).__init__(model, ax=ax, **kwargs)
-
+	
         # Get the scoring method
         if metric not in KELBOW_SCOREMAP:
             raise YellowbrickValueError(
                 "'{}' is not a defined metric "
-                "use one of distortion, silhouette, or calinski_harabaz"
+                "use one of distortion, silhouette, calinski_harabaz or inertia"            )
+        
+        if metric == 'inertia' and model.__module__ != 'sklearn.cluster.k_means_':
+            raise YellowbrickValueError(
+                "inertia is only a defined metric for Scikit-Learn KMeans models" 
+                "use one of distortion, silhouette or calinski_harabaz"
+            )
+           
+        #from sklearn.cluster import MiniBatchKMeans
+        if metric == 'inertia' and model.__class__.__name__ == 'MiniBatchKMeans':
+            raise YellowbrickValueError(
+                "inertia is not a defined metric for Scikit-Learn MiniBatchKMeans models" 
+                "use one of distortion, silhouette or calinski_harabaz"
             )
 
         # Store the arguments
@@ -292,15 +314,21 @@ class KElbowVisualizer(ClusteringScoreVisualizer):
 
             # Append the time and score to our plottable metrics
             self.k_timers_.append(time.time() - start)
-            self.k_scores_.append(
+	    if self.metric == 'inertia': #Inertia comes from the KMeans model itself and not from X values
+                self.k_scores_.append(
+                self.scoring_metric(self.estimator)
+                )
+            else:
+                self.k_scores_.append(
                 self.scoring_metric(X, self.estimator.labels_)
-            )    
+            )
 
         if self.locate_elbow:
             locator_kwargs = {
                 'distortion': {'curve_nature': 'convex', 'curve_direction': 'decreasing'},
                 'silhouette': {'curve_nature': 'concave', 'curve_direction': 'increasing'},
                 'calinski_harabaz': {'curve_nature': 'concave', 'curve_direction': 'increasing'},
+		'inertia': {'curve_nature': 'convex', 'curve_direction': 'decreasing’},
                 }.get(self.metric, {})   
             elbow_locator = KneeLocator(self.k_values_,self.k_scores_,**locator_kwargs)
             self.elbow_value_ = elbow_locator.knee
