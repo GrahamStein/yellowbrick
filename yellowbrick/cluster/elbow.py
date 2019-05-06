@@ -110,7 +110,7 @@ def distortion_score(X, labels, metric='euclidean'):
 ## Metrics
 ##########################################################################
 
-def inertia_score(model): 
+def inertia_score(model):
     """
     Return Inertia_ score from passed sklearn KMeans model. Numerically similar to distortion.
     """
@@ -124,7 +124,7 @@ KELBOW_SCOREMAP = {
     "distortion": distortion_score,
     "silhouette": silhouette_score,
     "calinski_harabaz": calinski_harabaz_score,
-    "inertia": inertia_score, 
+    "inertia": inertia_score,
 }
 
 
@@ -183,12 +183,12 @@ class KElbowVisualizer(ClusteringScoreVisualizer):
         Display the fitting time per k to evaluate the amount of time required
         to train the clustering model.
 
-    locate_elbow : bool, default: True 
-        Automatically find the "elbow" or "knee" which likely corresponds to the optimal 
-        value of k using the "knee point detection algorithm". The knee point detection 
+    locate_elbow : bool, default: True
+        Automatically find the "elbow" or "knee" which likely corresponds to the optimal
+        value of k using the "knee point detection algorithm". The knee point detection
         algorithm finds the point of maximum curvature, which in a well-behaved clustering
         problem also represents the pivot of the elbow curve. The point is labeled with a
-        dashed line and annotated with the score and k values.      
+        dashed line and annotated with the score and k values.
 
     kwargs : dict
         Keyword arguments that are passed to the base class and may influence
@@ -206,7 +206,7 @@ class KElbowVisualizer(ClusteringScoreVisualizer):
         The optimal value of k.
 
     elbow_score_ : float
-        The silhouette score corresponding to the optimal value of k.         
+        The silhouette score corresponding to the optimal value of k.
 
     Examples
     --------
@@ -229,8 +229,8 @@ class KElbowVisualizer(ClusteringScoreVisualizer):
     For a discussion on the Elbow method, read more at
     `Robert Gove's Block <https://bl.ocks.org/rpgove/0060ff3b656618e9136b>`_.
     To know about 'Knee Point Detection Algorithm' read at `Finding a "kneedle" in a Haystack
-    <https://raghavan.usc.edu//papers/kneedle-simplex11.pdf>`_.  
-    
+    <https://raghavan.usc.edu//papers/kneedle-simplex11.pdf>`_.
+
     .. seealso:: The scikit-learn documentation for the `silhouette_score
         <https://bit.ly/2LYWjYb>`_ and `calinski_harabaz_score
         <https://bit.ly/2LW3Zu9>`_. The default, `distortion_score`, is
@@ -244,23 +244,23 @@ class KElbowVisualizer(ClusteringScoreVisualizer):
     def __init__(self, model, ax=None, k=10,
                  metric="distortion", timings=True, locate_elbow=True, **kwargs):
         super(KElbowVisualizer, self).__init__(model, ax=ax, **kwargs)
-	
+
         # Get the scoring method
         if metric not in KELBOW_SCOREMAP:
             raise YellowbrickValueError(
                 "'{}' is not a defined metric "
                 "use one of distortion, silhouette, calinski_harabaz or inertia"            )
-        
+
         if metric == 'inertia' and model.__module__ != 'sklearn.cluster.k_means_':
             raise YellowbrickValueError(
-                "inertia is only a defined metric for Scikit-Learn KMeans models" 
+                "inertia is only a defined metric for Scikit-Learn KMeans models"
                 "use one of distortion, silhouette or calinski_harabaz"
             )
-           
+
         #from sklearn.cluster import MiniBatchKMeans
         if metric == 'inertia' and model.__class__.__name__ == 'MiniBatchKMeans':
             raise YellowbrickValueError(
-                "inertia is not a defined metric for Scikit-Learn MiniBatchKMeans models" 
+                "inertia is not a defined metric for Scikit-Learn MiniBatchKMeans models"
                 "use one of distortion, silhouette or calinski_harabaz"
             )
 
@@ -314,7 +314,7 @@ class KElbowVisualizer(ClusteringScoreVisualizer):
 
             # Append the time and score to our plottable metrics
             self.k_timers_.append(time.time() - start)
-	    if self.metric == 'inertia': #Inertia comes from the KMeans model itself and not from X values
+            if self.metric == 'inertia': #Inertia comes from the KMeans model itself and not from X values
                 self.k_scores_.append(
                 self.scoring_metric(self.estimator)
                 )
@@ -328,18 +328,18 @@ class KElbowVisualizer(ClusteringScoreVisualizer):
                 'distortion': {'curve_nature': 'convex', 'curve_direction': 'decreasing'},
                 'silhouette': {'curve_nature': 'concave', 'curve_direction': 'increasing'},
                 'calinski_harabaz': {'curve_nature': 'concave', 'curve_direction': 'increasing'},
-		'inertia': {'curve_nature': 'convex', 'curve_direction': 'decreasing’},
-                }.get(self.metric, {})   
+		        'inertia': {'curve_nature': 'convex', 'curve_direction': 'decreasing'},
+                }.get(self.metric, {})
             elbow_locator = KneeLocator(self.k_values_,self.k_scores_,**locator_kwargs)
             self.elbow_value_ = elbow_locator.knee
             if self.elbow_value_ == None:
                 warning_message=\
                 "No 'knee' or 'elbow' point detected, " \
-                "pass `locate_elbow=False` to remove the warning"   
-                warnings.warn(warning_message,YellowbrickWarning) 
+                "pass `locate_elbow=False` to remove the warning"
+                warnings.warn(warning_message,YellowbrickWarning)
             else:
                 self.elbow_score_ = self.k_scores_[self.k_values_.index(self.elbow_value_)]
-                   
+
 
         self.draw()
 
@@ -354,7 +354,7 @@ class KElbowVisualizer(ClusteringScoreVisualizer):
         if self.locate_elbow and self.elbow_value_!=None:
             elbow_label = "$elbow\ at\ k={}, score={:0.3f}$".format(self.elbow_value_, self.elbow_score_)
             self.ax.axvline(self.elbow_value_, c=LINE_COLOR, linestyle="--", label=elbow_label)
-            
+
         # If we're going to plot the timings, create a twinx axis
         if self.timings:
             self.axes = [self.ax, self.ax.twinx()]
@@ -370,7 +370,7 @@ class KElbowVisualizer(ClusteringScoreVisualizer):
         """
         Prepare the figure for rendering by setting the title as well as the
         X and Y axis labels and adding the legend.
-        
+
         """
         # Get the metric name
         metric = self.scoring_metric.__name__.replace("_", " ").title()
@@ -383,7 +383,7 @@ class KElbowVisualizer(ClusteringScoreVisualizer):
         # Set the x and y labels
         self.ax.set_xlabel('k')
         self.ax.set_ylabel(metric.lower())
-        
+
         #set the legend if locate_elbow=True
         if self.locate_elbow and self.elbow_value_!=None:
             self.ax.legend(loc='best', fontsize='medium')
