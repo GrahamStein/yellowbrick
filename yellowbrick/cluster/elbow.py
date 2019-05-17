@@ -328,7 +328,7 @@ class KElbowVisualizer(ClusteringScoreVisualizer):
                 'distortion': {'curve_nature': 'convex', 'curve_direction': 'decreasing'},
                 'silhouette': {'curve_nature': 'concave', 'curve_direction': 'increasing'},
                 'calinski_harabaz': {'curve_nature': 'concave', 'curve_direction': 'increasing'},
-		'inertia': {'curve_nature': 'convex', 'curve_direction': 'decreasing’},
+		'inertia': {'curve_nature': 'convex', 'curve_direction': 'decreasing'},
                 }.get(self.metric, {})   
             elbow_locator = KneeLocator(self.k_values_,self.k_scores_,**locator_kwargs)
             self.elbow_value_ = elbow_locator.knee
