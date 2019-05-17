@@ -314,21 +314,23 @@ class KElbowVisualizer(ClusteringScoreVisualizer):
 
             # Append the time and score to our plottable metrics
             self.k_timers_.append(time.time() - start)
-	    if self.metric == 'inertia': #Inertia comes from the KMeans model itself and not from X values
+            
+            # Inertia comes from the KMeans model itself and not from X values
+            if self.metric == 'inertia':
                 self.k_scores_.append(
                 self.scoring_metric(self.estimator)
                 )
             else:
                 self.k_scores_.append(
                 self.scoring_metric(X, self.estimator.labels_)
-            )
+                )
 
         if self.locate_elbow:
             locator_kwargs = {
                 'distortion': {'curve_nature': 'convex', 'curve_direction': 'decreasing'},
                 'silhouette': {'curve_nature': 'concave', 'curve_direction': 'increasing'},
                 'calinski_harabaz': {'curve_nature': 'concave', 'curve_direction': 'increasing'},
-		'inertia': {'curve_nature': 'convex', 'curve_direction': 'decreasing'},
+                'inertia': {'curve_nature': 'convex', 'curve_direction': 'decreasing'},
                 }.get(self.metric, {})   
             elbow_locator = KneeLocator(self.k_values_,self.k_scores_,**locator_kwargs)
             self.elbow_value_ = elbow_locator.knee
